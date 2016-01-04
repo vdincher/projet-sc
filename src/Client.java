@@ -51,7 +51,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	}		
 	
 	// binding in the name server
-	public static void register(String name, SharedObject_itf so) {
+	public synchronized static void register(String name, SharedObject_itf so) {
 		
 		try {
 			server.register(name, ((SharedObject) so).getID());
@@ -63,7 +63,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	}
 
 	// creation of a shared object
-	public static SharedObject create(Object o) {
+	public synchronized static SharedObject create(Object o) {
 		
 			
 		//Demander un ID au serveur
@@ -88,6 +88,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// request a read lock from the server
 	public static Object lock_read(int id) {
+		
 	}
 
 	// request a write lock from the server

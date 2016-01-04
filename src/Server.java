@@ -46,13 +46,13 @@ public class Server implements Server_itf {
 	}
 
 	@Override
-	public void register(String name, int id) throws RemoteException {
+	public synchronized void register(String name, int id) throws RemoteException {
 		// TODO Auto-generated method stub
 		objets.get(id).setNom(name);
 	}
 
 	@Override
-	public int create(Object o) throws RemoteException {
+	public synchronized int create(Object o) throws RemoteException {
 		// TODO Auto-generated method stub
 		
 		ServerObject obj=new ServerObject(o,id++);

@@ -5,11 +5,18 @@ public class ServerObject implements Serializable {
 	private Object o;
 	private String nom;
 	private int ID;
+	private enum Statut{
+		nl,
+		rl,
+		wl;
+	}
+	private Statut statut;
 	
 	public ServerObject( Object o, int id){
 		this.o=o;
 		
 		this.ID=id;
+		this.statut=Statut.nl;
 	}
 	
 	public Object getO() {

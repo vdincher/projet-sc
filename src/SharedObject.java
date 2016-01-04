@@ -1,15 +1,27 @@
 import java.io.*;
 
+import ServerObject.Statut;
+
 public class SharedObject implements Serializable, SharedObject_itf {
 	
 	private Object o;
 	private String nom;
 	private int ID;
+	private enum Statut{
+		nl,
+		rlc,
+		wlc,
+		rlt,
+		wlt,
+		rlt_wlc;
+	}
+	private Statut statut;
 	
 	public SharedObject( Object o, int id){
 		this.o=o;
 		
 		this.ID=id;
+		this.statut=Statut.nl;
 	}
 	
 	public Object getO() {
