@@ -1,11 +1,13 @@
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.rmi.registry.*;
 import java.net.*;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
 	private static Server_itf server;
+	private static HashMap< Integer , SharedObject > objets = new HashMap();
 	
 	public Client() throws RemoteException {
 		super();
@@ -35,28 +37,49 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	}
 	
 	// lookup in the name server
-	public static SharedObject lookup(String name) {
+	public static SharedObject lookup(String name)  {
+		SharedObject s=null;
+		try {
+			int id=server.lookup(name);
+			s = objets.get(id);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			return s;
+		}
 	}		
 	
 	// binding in the name server
 	public static void register(String name, SharedObject_itf so) {
 		
-	}
-
-	// creation of a shared object
-	public static SharedObject create(Object o) {
-		SharedObject s = new SharedObject();
-		s.setO(o);	
-		//Demander un ID au serveur
-		int id;
 		try {
-			id = server.create(o);
-			s.setID(id);
+			server.register(name, ((SharedObject) so).getID());
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return s;
+		
+	}
+
+	// creation of a shared object
+	public static SharedObject create(Object o) {
+		
+			
+		//Demander un ID au serveur
+		int id;
+		SharedObject s = null;
+		try {
+			id = server.create(o);
+			s = new SharedObject(o,id);
+			
+		   objets.put(id,s);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			return s;
+		}
 	}
 	
 /////////////////////////////////////////////////////////////

@@ -4,10 +4,12 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
 
 public class Server implements Server_itf {
 
 	static int id=0;
+	HashMap<  Integer, ServerObject > objets= new HashMap<>();
 	public static void main (String args[]) {
 		
 			// Création du serveur de nom - rmiregistry
@@ -41,13 +43,17 @@ public class Server implements Server_itf {
 	@Override
 	public void register(String name, int id) throws RemoteException {
 		// TODO Auto-generated method stub
-
+		objets.get(id).setNom(name);
 	}
 
 	@Override
 	public int create(Object o) throws RemoteException {
 		// TODO Auto-generated method stub
-		return id++;
+		
+		ServerObject obj=new ServerObject(o,id++);
+		objets.put(id, obj);
+		return id;
+		
 	}
 
 	@Override

@@ -6,6 +6,12 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	private String nom;
 	private int ID;
 	
+	public SharedObject( Object o, int id){
+		this.o=o;
+		
+		this.ID=id;
+	}
+	
 	public Object getO() {
 		return o;
 	}
