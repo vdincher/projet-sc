@@ -36,8 +36,13 @@ public class Server implements Server_itf {
 	
 	@Override
 	public int lookup(String name) throws RemoteException {
-		// TODO Auto-generated method stub
-		return 0;
+		int nid=0;
+		for (ServerObject o : objets.values()) {
+			if (o.getNom().equals(name))
+				nid=o.getID();
+			break;
+		}
+		return nid;
 	}
 
 	@Override
