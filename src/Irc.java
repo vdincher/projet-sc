@@ -76,7 +76,7 @@ class readListener implements ActionListener {
 		irc.sentence.lock_read();
 		
 		// invoke the method
-		String s = ((Sentence)(irc.sentence.obj)).read();
+		String s = ((Sentence)(irc.sentence.getO())).read();
 		
 		// unlock the object
 		irc.sentence.unlock();
@@ -100,7 +100,7 @@ class writeListener implements ActionListener {
 		irc.sentence.lock_write();
 		
 		// invoke the method
-		((Sentence)(irc.sentence.obj)).write(Irc.myName+" wrote "+s);
+		((Sentence)(irc.sentence.getO())).write(Irc.myName+" wrote "+s);
 		irc.data.setText("");
 		
 		// unlock the object

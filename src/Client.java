@@ -8,6 +8,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	private static Server_itf server;
 	private static HashMap< Integer , SharedObject > objets = new HashMap();
+	private static Client_itf client;
 	
 	public Client() throws RemoteException {
 		super();
@@ -24,6 +25,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		try {
 			Server_itf obj = (Server_itf) Naming.lookup("//localhost:8080/mon_serveur");
 			server=obj;
+			client = new Client();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -42,6 +44,9 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		try {
 			int id=server.lookup(name);
 			s = objets.get(id);
+			if (s==null) {
+				objets.put(id, new SharedObject(null, id));
+			}
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -88,24 +93,46 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// request a read lock from the server
 	public static Object lock_read(int id) {
-		
+		Object o=null;
+		try {
+			o=server.lock_read(id,client);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			return o;
+		}
 	}
 
 	// request a write lock from the server
 	public static Object lock_write (int id) {
+		Object o=null;
+		try {
+			o=server.lock_write(id,client);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			return o;
+		}
 	}
 
 	// receive a lock reduction request from the server
 	public Object reduce_lock(int id) throws java.rmi.RemoteException {
+		objets.get(id).reduce_lock();
+		return objets.get(id).getO();
 	}
 
 
 	// receive a reader invalidation request from the server
 	public void invalidate_reader(int id) throws java.rmi.RemoteException {
+		objets.get(id).invalidate_reader();
 	}
 
 
 	// receive a writer invalidation request from the server
 	public Object invalidate_writer(int id) throws java.rmi.RemoteException {
+		objets.get(id).invalidate_writer();
+		return objets.get(id).getO();
 	}
 }

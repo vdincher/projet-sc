@@ -10,6 +10,7 @@ public class Server implements Server_itf {
 
 	static int id=0;
 	HashMap<  Integer, ServerObject > objets= new HashMap<>();
+	
 	public static void main (String args[]) {
 		
 			// Création du serveur de nom - rmiregistry
@@ -63,14 +64,18 @@ public class Server implements Server_itf {
 
 	@Override
 	public Object lock_read(int id, Client_itf client) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		this.objets.get(id).lock_read();
+		this.objets.get(id).getLecteurs().add((Client) client);
+		Object o = this.objets.get(id).getO();
+		return o;
 	}
 
 	@Override
 	public Object lock_write(int id, Client_itf client) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		this.objets.get(id).lock_write();
+		this.objets.get(id).setRedacteur((Client) client);
+		Object o = this.objets.get(id).getO();
+		return o;
 	}
 
 }
