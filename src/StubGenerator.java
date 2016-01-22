@@ -45,40 +45,39 @@ public class StubGenerator {
 					+ "\t }\n\n");
 
 			for (Method meth : classStub.getMethods()) {
-				if ((meth.getAnnotation(Read.class)!=null) || (meth.getAnnotation(Write.class)!=null)) {
-					fw.write("\t ");
-					// On écrit les modifiers sauf abstract
-					for (String s : Modifier.toString(meth.getModifiers()).split(" abstract")) {
-						fw.write(s);
-					}
 
-					// On écrit ensuite le type du retour de la methode et son nom
-					fw.write(" " + meth.getReturnType().getName() + " " + meth.getName() + "(");
-					// On écrit chaque paramètres (avec une virgule avant, sauf pour le premier)
-					for (int i=0; i<meth.getParameters().length; i++) {
-						if (i!=0) {
-							fw.write(", ");
-						}
-						Parameter param = meth.getParameters()[i];
-						fw.write(param.getType().getName() + " " + param.getName());
-					}
-					fw.write(")");
-					// On écrit les exceptions
-					if (meth.getExceptionTypes().length!=0) {
-						fw.write(" throws ");
-						for (Class<?> eClass : meth.getExceptionTypes()) {
-							fw.write(eClass.getName() + " ");
-						}
-					}
-					fw.write("{\n");
+				fw.write("\t ");
+				// On écrit les modifiers sauf abstract
+				for (String s : Modifier.toString(meth.getModifiers()).split(" abstract")) {
+					fw.write(s);
 				}
+
+				// On écrit ensuite le type du retour de la methode et son nom
+				fw.write(" " + meth.getReturnType().getName() + " " + meth.getName() + "(");
+				// On écrit chaque paramètres (avec une virgule avant, sauf pour le premier)
+				for (int i=0; i<meth.getParameters().length; i++) {
+					if (i!=0) {
+						fw.write(", ");
+					}
+					Parameter param = meth.getParameters()[i];
+					fw.write(param.getType().getName() + " " + param.getName());
+				}
+				fw.write(")");
+				// On écrit les exceptions
+				if (meth.getExceptionTypes().length!=0) {
+					fw.write(" throws ");
+					for (Class<?> eClass : meth.getExceptionTypes()) {
+						fw.write(eClass.getName() + " ");
+					}
+				}
+				fw.write("{\n");
 				// On teste si la méthode est @Read et/ou @Write
 				if (meth.getAnnotation(Write.class)!=null) {
 					fw.write("\t \t this.lock_write();\n");
 				}
 				if (meth.getAnnotation(Read.class)!=null) {
 					fw.write("\t \t this.lock_read();\n"
-						   + "\t \t " + meth.getReturnType().getName() + " returnReadFor" + className + "Stub  = ");
+							+ "\t \t " + meth.getReturnType().getName() + " returnReadFor" + className + "Stub  = ");
 				}
 				if ((meth.getAnnotation(Read.class)!=null) || (meth.getAnnotation(Write.class)!=null)) {
 					if (meth.getAnnotation(Read.class)==null) {
@@ -93,12 +92,48 @@ public class StubGenerator {
 						fw.write(param.getName());
 					}
 					fw.write(");\n"
-							+ "\t \t this.unlock();\n");
+							+ "\t \t if (Transaction.getCurrentTransaction()==null) {\n"
+							+ "\t \t \t this.unlock();\n"
+							+ "\t \t }\n");
 					if (meth.getAnnotation(Read.class)!=null) {
 						fw.write("\t \t return returnReadFor" + className + "Stub;\n");
 					}
-					fw.write("\t }\n\n");
+				} else {
+					if (meth.getReturnType()!=void.class) {
+						if (meth.getReturnType().isPrimitive()) {
+							switch (meth.getReturnType().getName()) {
+							
+							case "boolean" :
+								fw.write("\t \t return true;\n");
+								break;
+							case "char" :
+								fw.write("\t \t return 'a';\n");
+								break;
+							case "byte" :
+								fw.write("\t \t return 0;\n");
+								break;
+							case "short" :
+								fw.write("\t \t return 0;\n");
+								break;
+							case "int" :
+								fw.write("\t \t return 0;\n");
+								break;
+							case "long" :
+								fw.write("\t \t return 0;\n");
+								break;
+							case "float" :
+								fw.write("\t \t return 0.0F;\n");
+								break;
+							case "double" :
+								fw.write("\t \t return 0.0;\n");
+								break;
+							}
+						} else {
+							fw.write("\t \t return (new " + meth.getReturnType().getName() + "());\n");
+						}
+					}
 				}
+				fw.write("\t }\n\n");
 			}
 			fw.write("\n");
 

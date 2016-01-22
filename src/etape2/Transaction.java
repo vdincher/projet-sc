@@ -29,20 +29,20 @@ public class Transaction {
 
 	public void commit() {
 		for (SharedObject s : this.objetsInitiauxEcriture) {
-			Client.objets.get(s.getID()).unlock();
+			Client.getObjets().get(s.getID()).unlock();
 		}
 		for (SharedObject s : this.objetsInitiauxLecture) {
-			Client.objets.get(s.getID()).unlock();
+			Client.getObjets().get(s.getID()).unlock();
 		}
 		this.stop();
 	}
 
 	public void abort() {
 		for (SharedObject s : this.objetsInitiauxEcriture) {
-			Client.objets.put(s.getID(), s);
+			Client.getObjets().put(s.getID(), s);
 		}
 		for (SharedObject s : this.objetsInitiauxLecture) {
-			Client.objets.get(s.getID()).unlock();
+			Client.getObjets().get(s.getID()).unlock();
 		}
 		this.stop();
 	}

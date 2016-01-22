@@ -10,13 +10,17 @@ public class Sentence_stub extends SharedObject implements Sentence_itf, java.io
 	 public void write(java.lang.String arg0){
 	 	 this.lock_write();
 	 	 ((Sentence) this.getO()).write(arg0);
-	 	 this.unlock();
+	 	 if (Transaction.getCurrentTransaction()==null) {
+	 	 	 this.unlock();
+	 	 }
 	 }
 
 	 public java.lang.String read(){
 	 	 this.lock_read();
 	 	 java.lang.String returnReadForSentenceStub  = ((Sentence) this.getO()).read();
-	 	 this.unlock();
+	 	 if (Transaction.getCurrentTransaction()==null) {
+	 	 	 this.unlock();
+	 	 }
 	 	 return returnReadForSentenceStub;
 	 }
 
