@@ -1,3 +1,6 @@
+package etape2;
+
+
 import java.io.*;
 
 public class SharedObject implements Serializable, SharedObject_itf {

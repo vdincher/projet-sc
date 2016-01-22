@@ -1,3 +1,4 @@
+package etape1;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	
 	private static final long serialVersionUID = 1L;
 	private static Server_itf server;
-	public static HashMap< Integer , SharedObject > objets = new HashMap<Integer,SharedObject>();
+	private static HashMap< Integer , SharedObject > objets = new HashMap<Integer,SharedObject>();
 	private static Client_itf client;
 	
 	public Client() throws RemoteException {

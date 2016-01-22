@@ -1,3 +1,5 @@
+package etape1;
+
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;

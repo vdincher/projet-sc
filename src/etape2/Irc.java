@@ -1,3 +1,5 @@
+package etape2;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.rmi.*;

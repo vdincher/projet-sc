@@ -1,3 +1,5 @@
+package etape1;
+
 public class Sentence implements java.io.Serializable {
 	
 	private static final long serialVersionUID = 1L;

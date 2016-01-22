@@ -1,3 +1,4 @@
+package etape2;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;

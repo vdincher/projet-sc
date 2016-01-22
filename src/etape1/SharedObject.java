@@ -1,3 +1,6 @@
+package etape1;
+
+
 import java.io.*;
 
 public class SharedObject implements Serializable, SharedObject_itf {
@@ -36,28 +39,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	public void setID(int iD) {
 		ID = iD;
-	}
-
-	public SharedObject deepClone() {
-		SharedObject s=null;
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		try{
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(this);
-			oos.flush();
-			oos.close();
-			bos.close();
-			byte[] byteData = bos.toByteArray();
-
-			ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-
-			s = (SharedObject) new ObjectInputStream(bais).readObject();
-		} catch (ClassNotFoundException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return s;
 	}
 
 	// invoked by the user program on the client node

@@ -1,3 +1,5 @@
+package etape1;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.rmi.*;
@@ -17,16 +19,16 @@ public class Irc extends Frame {
 	static String		myName;
 
 	public static void main(String argv[]) {
-
+		
 		if (argv.length != 1) {
 			System.out.println("java Irc <name>");
 			return;
 		}
 		myName = argv[0];
-
+	
 		// initialize the system
 		Client.init();
-
+		
 		// look up the IRC object in the name server
 		// if not found, create it, and register it in the name server
 		SharedObject s = Client.lookup("IRC");
@@ -39,28 +41,28 @@ public class Irc extends Frame {
 	}
 
 	public Irc(SharedObject s) {
-
+	
 		setLayout(new FlowLayout());
-
+	
 		text=new TextArea(10,60);
 		text.setEditable(false);
 		text.setForeground(Color.red);
 		add(text);
-
+	
 		data=new TextField(60);
 		add(data);
-
+	
 		Button write_button = new Button("write");
 		write_button.addActionListener(new writeListener(this));
 		add(write_button);
 		Button read_button = new Button("read");
 		read_button.addActionListener(new readListener(this));
 		add(read_button);
-
+		
 		setSize(470,300);
 		text.setBackground(Color.black); 
 		show();
-
+		
 		sentence = s;
 	}
 }
@@ -73,63 +75,44 @@ class readListener implements ActionListener {
 		irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
-
-
-		Transaction t = Transaction.getCurrentTransaction();
-		if (t==null) {
-			t=new Transaction();
-		}
-		t.start();
-		t.add_read(irc.sentence);
 		
-		try {
-			// invoke the method
-			String s = ((Sentence)(irc.sentence.getO())).read();
-
-			t.commit();
-			
-			// display the read value
-			irc.text.append(s+"\n");
-			System.out.println("Sortie pour read");
-		} catch(Exception except) {
-			t.abort();
-		}
-
+		// lock the object in read mode
+		irc.sentence.lock_read();
+		
+		// invoke the method
+		String s = ((Sentence)(irc.sentence.getO())).read();
+		
+		// unlock the object
+		irc.sentence.unlock();
+		
+		// display the read value
+		irc.text.append(s+"\n");
+		System.out.println("Sortie pour read");
 	}
 }
 
 class writeListener implements ActionListener {
 	Irc irc;
 	public writeListener (Irc i) {
-		irc = i;
+        	irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
-
+		
 		// get the value to be written from the buffer
-		String s = irc.data.getText();
+        	String s = irc.data.getText();
+        	
+        	// lock the object in write mode
 
-		Transaction t = Transaction.getCurrentTransaction();
-		if (t==null) {
-			System.out.println("a1");
-			t=new Transaction();
-			System.out.println("a2");
-		}
-		t.start();
-		t.add_write(irc.sentence);
-
-		try {
+		irc.sentence.lock_write();
+		
 
 		// invoke the method
 		((Sentence)(irc.sentence.getO())).write(Irc.myName+" wrote "+s);
 		irc.data.setText("");
 		
-		t.commit();
-
+		// unlock the object
+		irc.sentence.unlock();
 		System.out.println("Sortie du unlock");
-		
-		} catch(Exception except) {
-			t.abort();
-		}
 	}
 }
 
