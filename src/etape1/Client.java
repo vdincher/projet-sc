@@ -130,7 +130,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a lock reduction request from the server
 	public synchronized Object reduce_lock(int id) throws java.rmi.RemoteException {
-		objets.get(id).reduce_lock();
+		objets.get(id).setO(objets.get(id).reduce_lock());
 		return objets.get(id).getO();
 	}
 
@@ -143,7 +143,9 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a writer invalidation request from the server
 	public synchronized Object invalidate_writer(int id) throws java.rmi.RemoteException {
-		objets.get(id).invalidate_writer();
+		
+       objets.get(id).setO(objets.get(id).invalidate_writer());
+
 		return objets.get(id).getO();
 	}
 }

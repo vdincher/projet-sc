@@ -48,7 +48,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		this.setO(Client.lock_read(ID));
 		break;
 		case wlc : this.statut=Statut.rlt_wlc;
-		this.setO(Client.lock_read(ID));
+		//this.setO(Client.lock_read(ID));
 		break;
 		case rlc : this.statut=Statut.rlt;
 		break;
@@ -116,7 +116,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	public Object invalidate_writer() {
-		if (this.statut==Statut.wlt) {
+		if (this.statut==Statut.wlt || this.statut== Statut.rlt_wlc) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -125,6 +125,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			}
 		}
 		this.statut=Statut.nl;
+		System.out.println("je me mets en nl");
 		return o;
 	}
 }

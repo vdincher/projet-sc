@@ -85,15 +85,6 @@ public class ServerObject implements Serializable {
 		this.red=true;
 	}
 
-	// invoked by the user program on the client node
-	//public synchronized void unlock() {
-	//	switch (this.statut) {
-	//	case rl : 
-	//	case wl : redacteur=null;
-	//			  this.statut=Statut.nl;
-	//			  break;
-	//	}
-	//}
 
 
 	// callback invoked remotely by the server
@@ -138,11 +129,13 @@ public class ServerObject implements Serializable {
 
 	public Object invalidate_writer() {
 		try {
-			this.redacteur.invalidate_writer(ID);
+			this.o=this.redacteur.invalidate_writer(ID);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		red=false;
+		this.redacteur=null;
 		return this.o;
 	}
 	
