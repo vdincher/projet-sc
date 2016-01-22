@@ -6,6 +6,10 @@ import java.rmi.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import etape2.Irc;
+import etape2.Sentence;
+
 import java.lang.*;
 import java.rmi.registry.*;
 
@@ -17,14 +21,20 @@ public class Irc extends Frame {
 	public TextField	data;
 	SharedObject		sentence;
 	static String		myName;
+	static boolean		useTransaction;
 
 	public static void main(String argv[]) {
-
-		if (argv.length != 1) {
-			System.out.println("java Irc <name>");
+		
+		if ((argv.length != 1 && argv.length != 2) || (argv.length == 2 && !argv[1].equals("-t"))) {
+			System.out.println("java Irc <name> [-t]");
 			return;
 		}
 		myName = argv[0];
+		if (argv.length == 2) {
+			useTransaction = true;
+		} else {
+			useTransaction = false;
+		}
 
 		// initialize the system
 		Client.init();
@@ -76,25 +86,36 @@ class readListener implements ActionListener {
 	}
 	public void actionPerformed (ActionEvent e) {
 
+		if (irc.useTransaction) {
 
-		Transaction t = Transaction.getCurrentTransaction();
-		if (t==null) {
-			t=new Transaction();
-		}
-		t.start();
-		t.add_read(irc.sentence);
-		
-		try {
+			Transaction t = new Transaction();
+			t.start();
+			irc.sentence.lock_read();
+
+			try {
+				// invoke the method
+				String s = ((Sentence)(irc.sentence.getO())).read();
+
+				t.commit();
+
+				// display the read value
+				irc.text.append(s+"\n");
+				System.out.println("Sortie pour read");
+			} catch(Exception except) {
+				t.abort();
+			}
+		} else {
+			// lock the object in read mode
+			irc.sentence.lock_read();
+
 			// invoke the method
 			String s = ((Sentence)(irc.sentence.getO())).read();
 
-			t.commit();
-			
+			// unlock the object
+			irc.sentence.unlock();
+
 			// display the read value
 			irc.text.append(s+"\n");
-			System.out.println("Sortie pour read");
-		} catch(Exception except) {
-			t.abort();
 		}
 
 	}
@@ -110,27 +131,38 @@ class writeListener implements ActionListener {
 		// get the value to be written from the buffer
 		String s = irc.data.getText();
 
-		Transaction t = Transaction.getCurrentTransaction();
-		if (t==null) {
-			System.out.println("a1");
-			t=new Transaction();
-			System.out.println("a2");
-		}
-		t.start();
-		t.add_write(irc.sentence);
+		if (irc.useTransaction) {
 
-		try {
+			Transaction t = new Transaction();
+			t.start();
+			t.start();
+			irc.sentence.lock_write();
 
-		// invoke the method
-		((Sentence)(irc.sentence.getO())).write(Irc.myName+" wrote "+s);
-		irc.data.setText("");
-		
-		t.commit();
+			try {
 
-		System.out.println("Sortie du unlock");
-		
-		} catch(Exception except) {
-			t.abort();
+				// invoke the method
+				((Sentence)(irc.sentence.getO())).write(Irc.myName+" wrote "+s);
+				irc.data.setText("");
+
+				t.commit();
+
+				System.out.println("Sortie du unlock");
+
+			} catch(Exception except) {
+				t.abort();
+			}
+		} else {
+			// lock the object in write mode
+
+			irc.sentence.lock_write();
+
+
+			// invoke the method
+			((Sentence)(irc.sentence.getO())).write(Irc.myName+" wrote "+s);
+			irc.data.setText("");
+
+			// unlock the object
+			irc.sentence.unlock();
 		}
 	}
 }

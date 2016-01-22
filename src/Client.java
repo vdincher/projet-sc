@@ -60,6 +60,11 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		try {
 			int id=server.lookup(name);
 			if (id!=-1) {
+				Object o = getObjets().get(id).getO();
+				
+				Class<?> classForStub = Class.forName(o.getClass().getName() + "_stub");
+				Object arguments[] = {o,(Object) id};
+				classForStub stub = classForStub.getConstructors()[0].newInstance(arguments);
 				s = new SharedObject(null,id);
 				objets.put(id,s);
 			}

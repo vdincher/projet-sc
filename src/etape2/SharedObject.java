@@ -40,7 +40,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	public void setID(int iD) {
 		ID = iD;
 	}
-	
+
 	public SharedObject deepClone() {
 		SharedObject s=null;
 
@@ -77,6 +77,9 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		System.out.println("On passe en rlt");
 		break;
 		}
+		if (Transaction.getCurrentTransaction()!=null) {
+			Transaction.getCurrentTransaction().objetsInitiauxLecture.add(this.deepClone());
+		}
 	}
 
 	// invoked by the user program on the client node
@@ -86,6 +89,9 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		}
 		this.statut=Statut.wlt;
 		System.out.println("On passe en wlt");
+		if (Transaction.getCurrentTransaction()!=null) {
+			Transaction.getCurrentTransaction().objetsInitiauxEcriture.add(this.deepClone());
+		}
 	}
 
 	// invoked by the user program on the client node
