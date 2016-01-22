@@ -10,7 +10,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	
 	private static final long serialVersionUID = 1L;
 	private static Server_itf server;
-	public static HashMap< Integer , SharedObject > objets = new HashMap<Integer,SharedObject>();
+	private static HashMap< Integer , SharedObject > objets = new HashMap<Integer,SharedObject>();
 	private static Client_itf client;
 	
 	public Client() throws RemoteException {
@@ -86,7 +86,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			s = new SharedObject(o,id);
 			
 		   objets.put(id,s);
-		   System.out.println("l'objet est ajouté dans la collection objets du client");
+		   System.out.println("l'objet d'id: "+id+" est ajouté dans la collection objets du client");
 		} catch (RemoteException e) {
 			System.out.println("exception dans le create sharedObject");
 			e.printStackTrace();
@@ -130,7 +130,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a lock reduction request from the server
 	public synchronized Object reduce_lock(int id) throws java.rmi.RemoteException {
-		objets.get(id).reduce_lock();
+		objets.get(id).setO(objets.get(id).reduce_lock());
 		return objets.get(id).getO();
 	}
 
@@ -143,7 +143,9 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a writer invalidation request from the server
 	public synchronized Object invalidate_writer(int id) throws java.rmi.RemoteException {
-		objets.get(id).invalidate_writer();
+		System.out.println("i_r ient");
+       objets.get(id).setO(objets.get(id).invalidate_writer());
+       System.out.println("après i_r ient");
 		return objets.get(id).getO();
 	}
 }

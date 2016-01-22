@@ -87,7 +87,7 @@ class readListener implements ActionListener {
 		
 		// display the read value
 		irc.text.append(s+"\n");
-		System.out.println("Sortie pour read");
+
 	}
 }
 
@@ -112,7 +112,7 @@ class writeListener implements ActionListener {
 		
 		// unlock the object
 		irc.sentence.unlock();
-		System.out.println("Sortie du unlock");
+
 	}
 }
 

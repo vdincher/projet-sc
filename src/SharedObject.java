@@ -1,3 +1,6 @@
+
+
+
 import java.io.*;
 
 public class SharedObject implements Serializable, SharedObject_itf {
@@ -38,38 +41,18 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		ID = iD;
 	}
 
-	public SharedObject deepClone() {
-		SharedObject s=null;
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		try{
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(this);
-			oos.flush();
-			oos.close();
-			bos.close();
-			byte[] byteData = bos.toByteArray();
-
-			ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-
-			s = (SharedObject) new ObjectInputStream(bais).readObject();
-		} catch (ClassNotFoundException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return s;
-	}
-
 	// invoked by the user program on the client node
 	public void lock_read() {
 		switch (this.statut) {
 		case nl : this.statut=Statut.rlt;
 		this.setO(Client.lock_read(ID));
+		System.out.println("On passe en rlt");
 		break;
 		case wlc : this.statut=Statut.rlt_wlc;
-		this.setO(Client.lock_read(ID));
+		System.out.println("On passe en rlt_wlc");
 		break;
 		case rlc : this.statut=Statut.rlt;
+		System.out.println("On passe en rlt");
 		break;
 		}
 	}
@@ -80,16 +63,20 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			this.setO(Client.lock_write(ID));
 		}
 		this.statut=Statut.wlt;
+		System.out.println("On passe en wlt");
 	}
 
 	// invoked by the user program on the client node
 	public synchronized void unlock() {
 		switch(this.statut) {
 		case rlt : this.statut=Statut.rlc;
+		System.out.println("On passe en rlc");
 		break;
 		case wlt : this.statut=Statut.wlc;
+		System.out.println("On passe en wlc");
 		break;
 		case rlt_wlc : this.statut=Statut.wlc;
+		System.out.println("On passe en wlc");
 		break;
 		}
 		notify();
@@ -108,14 +95,18 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			}
 			switch (this.statut) {
 			case wlc : this.statut=Statut.rlc;
+			System.out.println("On passe en rlc");
 			break;
 			case rlt_wlc : this.statut=Statut.rlt;
+			System.out.println("On passe en rlt");
 			break;
 			}
 			break;
 		case wlc : this.statut=Statut.rlc;
+		System.out.println("On passe en rlc");
 		break;
 		case rlt_wlc : this.statut=Statut.rlt;
+		System.out.println("On passe en rlt");
 		break;
 		}
 		return o;
@@ -132,10 +123,11 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			}
 		}
 		this.statut=Statut.nl;
+		System.out.println("On passe en nl");
 	}
 
 	public Object invalidate_writer() {
-		if (this.statut==Statut.wlt) {
+		if (this.statut==Statut.wlt || this.statut == Statut.rlt_wlc) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -144,6 +136,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			}
 		}
 		this.statut=Statut.nl;
+		System.out.println("On passe en nl");
 		return o;
 	}
 }

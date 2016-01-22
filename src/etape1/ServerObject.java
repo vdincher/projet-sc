@@ -67,31 +67,47 @@ public class ServerObject implements Serializable {
 			this.setO(this.reduce_lock());
 		}
 		this.statut=Statut.rl;
+		System.out.println("On passe en rl");
 		this.redacteur=null;
 		this.red=false;
 	}
 
 	// invoked by the user program on the client node
 	public void lock_write() {
+
 		while (!lecteurs.isEmpty() || red) {
+
 			if (red) {
+
 				this.invalidate_writer();
+
 			} else {
 				this.invalidate_reader();
 				this.lecteurs.clear();
 			}
 		}
 		this.statut=Statut.wl;
+		System.out.println("On passe en wl");
 		this.red=true;
+
 	}
 
 
+
+	public Boolean getRed() {
+		return red;
+	}
+
+	public void setRed(Boolean red) {
+		this.red = red;
+	}
 
 	// callback invoked remotely by the server
 	public Object reduce_lock() {
 		Object obj = null;
 		try {
 			obj = this.redacteur.reduce_lock(ID);
+			this.lecteurs.add(this.redacteur);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -129,7 +145,9 @@ public class ServerObject implements Serializable {
 
 	public Object invalidate_writer() {
 		try {
+
 			this.o=this.redacteur.invalidate_writer(ID);
+
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
