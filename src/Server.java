@@ -82,5 +82,14 @@ public class Server extends UnicastRemoteObject implements Server_itf, Serializa
 		Object o = this.objets.get(id).getO();
 		return o;
 	}
+	
+	@Override
+	public Object getObjectFromName(String name) throws RemoteException {
+		for (ServerObject obj : objets.values()) {
+			if (obj.getNom().equals(name))
+				return (obj.getO());
+		}
+		return (new Object());
+	}
 
 }

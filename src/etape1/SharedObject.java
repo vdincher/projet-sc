@@ -42,7 +42,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	// invoked by the user program on the client node
-	public void lock_read() {
+	public synchronized void lock_read() {
 		switch (this.statut) {
 		case nl : this.statut=Statut.rlt;
 		this.setO(Client.lock_read(ID));
@@ -55,11 +55,14 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		System.out.println("On passe en rlt");
 		break;
 		}
+		//Notification des autres lecteurs (réveil en chaîne)
+		notify();
 	}
 
 	// invoked by the user program on the client node
-	public void lock_write() {
+	public  void lock_write() {
 		if (statut!=Statut.wlc) {
+
 			this.setO(Client.lock_write(ID));
 		}
 		this.statut=Statut.wlt;
@@ -84,7 +87,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 
 	// callback invoked remotely by the server
-	public Object reduce_lock() {
+	public synchronized Object reduce_lock() {
 		switch (this.statut) {
 		case wlt :
 			try {
@@ -113,8 +116,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	// callback invoked remotely by the server
-	public void invalidate_reader() {
-		if (this.statut==Statut.rlt) {
+	public synchronized void invalidate_reader() {
+		while (this.statut==Statut.rlt) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -126,10 +129,11 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		System.out.println("On passe en nl");
 	}
 
-	public Object invalidate_writer() {
-		if (this.statut==Statut.wlt || this.statut == Statut.rlt_wlc) {
+	public synchronized Object invalidate_writer() {
+		while (this.statut==Statut.wlt) {
 			try {
 				wait();
+
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -137,6 +141,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		}
 		this.statut=Statut.nl;
 		System.out.println("On passe en nl");
+
 		return o;
 	}
 }

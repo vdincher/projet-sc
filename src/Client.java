@@ -3,25 +3,27 @@ import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.rmi.registry.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
-	
+
 	private static final long serialVersionUID = 1L;
 	private static Server_itf server;
 	private static HashMap< Integer , SharedObject > objets = new HashMap<Integer,SharedObject>();
 	private static Client_itf client;
-	
+
 	public Client() throws RemoteException {
 		super();
 	}
 
-	
 
-///////////////////////////////////////////////////
-//         Interface to be used by applications
-///////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////
+	//         Interface to be used by applications
+	///////////////////////////////////////////////////
 
 	public static HashMap<Integer, SharedObject> getObjets() {
 		return objets;
@@ -53,84 +55,130 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// lookup in the name server
 	public static SharedObject lookup(String name)  {
 		SharedObject s=null;
 		try {
 			int id=server.lookup(name);
 			if (id!=-1) {
-				Object o = getObjets().get(id).getO();
-				
+				Object o = server.getObjectFromName(name);
+
 				Class<?> classForStub = Class.forName(o.getClass().getName() + "_stub");
-				Object arguments[] = {o,(Object) id};
-				classForStub stub = classForStub.getConstructors()[0].newInstance(arguments);
-				s = new SharedObject(null,id);
+				Constructor<?> construct = classForStub.getConstructor(Object.class, int.class);
+				s = (SharedObject) construct.newInstance(o, id);
+
 				objets.put(id,s);
 			}
-
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-			return s;
-		
-		
+		return s;
+
+
 	}		
-	
+
 	// binding in the name server
 	public synchronized static void register(String name, SharedObject_itf so) {
-		
+
 		try {
 			server.register(name, ((SharedObject) so).getID());
 		} catch (RemoteException e) {
 			System.out.println("Problème dans register du client");
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	// creation of a shared object
 	public synchronized static SharedObject create(Object o) {
-		
-			
+
+
 		//Demander un ID au serveur
 		int id;
 		SharedObject s = null;
+
 		try {
-			
-			id = server.create(o);
+			id=server.create(o);
 			System.out.println("création d'un nouvel objet pour serveur");
-			s = new SharedObject(o,id);
-			
-		   objets.put(id,s);
-		   System.out.println("l'objet d'id: "+id+" est ajouté dans la collection objets du client");
+
+			Class<?> classForStub = Class.forName(o.getClass().getName() + "_stub");
+			Constructor<?> construct = classForStub.getConstructor(Object.class, int.class);
+			s = (SharedObject) construct.newInstance(o, id);
+
+			objets.put(id,s);
+			System.out.println("l'objet d'id: "+id+" est ajouté dans la collection objets du client");
+
 		} catch (RemoteException e) {
-			System.out.println("exception dans le create sharedObject");
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-			return s;
-		
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return s;
+
 	}
-	
-/////////////////////////////////////////////////////////////
-//    Interface to be used by the consistency protocol
-////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////
+	//    Interface to be used by the consistency protocol
+	////////////////////////////////////////////////////////////
 
 	// request a read lock from the server
 	public synchronized static Object lock_read(int id) {
 		Object o=null;
 		try {
-			
+
 			o=server.lock_read(id,client);
-			
+
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 
 		} 
-			return o;
-		
+		return o;
+
 	}
 
 	// request a write lock from the server
@@ -142,8 +190,8 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-			return o;
-		
+		return o;
+
 	}
 
 	// receive a lock reduction request from the server
@@ -162,8 +210,8 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	// receive a writer invalidation request from the server
 	public synchronized Object invalidate_writer(int id) throws java.rmi.RemoteException {
 		System.out.println("i_r ient");
-       objets.get(id).setO(objets.get(id).invalidate_writer());
-       System.out.println("après i_r ient");
+		objets.get(id).setO(objets.get(id).invalidate_writer());
+		System.out.println("après i_r ient");
 		return objets.get(id).getO();
 	}
 }
