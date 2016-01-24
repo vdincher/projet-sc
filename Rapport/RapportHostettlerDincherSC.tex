@@ -1,0 +1,46 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{alltt}
+%\usepackage{picins}
+\usepackage{color}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\author{Damien Hostettler et Vicky Dincher}
+\title{Rapport de projet de Systèmes Concurrents} 
+\date{25 Janvier 2016}
+
+\renewcommand{\thesection}{\arabic{section}}
+\setcounter{tocdepth}{3}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+ 
+\section*{Introduction}
+
+Ce projet consiste à gérer la concurrence entre plusieurs processus dans le cadre d'objets partagés sur un serveur. Il s'agit de synchroniser la lecture et l'écriture de ces objets afin que chaque client ayant effectué une action ait la dernière version de l'objet. 
+
+\section{Architecture de l'application}
+
+L'application implémentée comporte quatre classes:
+\begin{itemize}
+\item La classe \textbf{ServerObject}, qui est la dernière version d'un objet partagé. Il peut être en \textit{lock$\_$read}, si plusieurs personnes lisent dans cet objet,  en \textit{lock$\_$write}, si une personne est en train d'écrire, ou en \textit{no$\_$lock}, si personne ne le possède. Les deux positions \textit{lr} et \textit{lw} sont incompatibles. Lors de chaque changement (lorsque l'objet passe en lecture ou en écriture), l'objet doit automatiquement repasser par le serveur.
+\item La classe \textbf{Server}: Cette classe permet d'établir le serveur qui contient tous les objets. Il contient un tableau de \textbf{ServerObject}, qui possèdent chacun un statut propre à eux-même. 
+\item La classe \textbf{SharedObject}, qui est la copie de l'objet, présente chez le client. Elle possède plusieurs status, qui sont ceux décrits dans le sujet. Chaque $SharedObject$ est propre à un $Client$. Le statut de l'objet, indique donc l'étât du client.
+\item La classe \textbf{Client}, qui représentera chaque client pouvant lire ou écrire.
+\end{itemize}
+On peut voir l'architecture de l'application sur le diagramme de classes suivant:
+%include graphics
+
+
+
+
+\end{document}
