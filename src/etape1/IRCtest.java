@@ -17,6 +17,12 @@ public class IRCtest extends Frame {
 	public TextField	data;
 	SharedObject		sentence;
 	static String		myName;
+	
+	Button write_button = new Button("write");
+	Button read_button = new Button("read");
+	Button lock_read_button = new Button("lock_read");
+	Button lock_write_button = new Button("lock_write");
+	Button unlock_button = new Button("unlock");
 
 	public static void main(String argv[]) {
 
@@ -52,21 +58,29 @@ public class IRCtest extends Frame {
 		data=new TextField(60);
 		add(data);
 
-		Button write_button = new Button("write");
+		
 		write_button.addActionListener(new writeListenerl(this));
 		add(write_button);
-		Button read_button = new Button("read");
+		
 		read_button.addActionListener(new readListenerl(this));
 		add(read_button);
-		Button lock_read_button = new Button("lock_read");
+		
 		lock_read_button.addActionListener(new lockreadListener(this));
 		add(lock_read_button);
-		Button lock_write_button = new Button("lock_write");
+		
 		lock_write_button.addActionListener(new lockwriteListener(this));
 		add(lock_write_button);
-		Button unlock_button = new Button("unlock");
+		
 		unlock_button.addActionListener(new unlockListener(this));
 		add(unlock_button);
+		
+		lock_read_button.setEnabled(true);
+		lock_write_button.setEnabled(true);
+		read_button.setEnabled(false);
+		write_button.setEnabled(false);
+		unlock_button.setEnabled(false);
+
+		
 
 		setSize(470,300);
 		text.setBackground(Color.black); 
@@ -85,9 +99,16 @@ class lockreadListener implements ActionListener {
 		irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
+		
+
 
 		// lock the object in read mode
 		irc.sentence.lock_read();
+		irc.lock_read_button.setEnabled(false);
+		irc.lock_write_button.setEnabled(false);
+		irc.read_button.setEnabled(true);
+		irc.write_button.setEnabled(false);
+		irc.unlock_button.setEnabled(true);
 
 	}
 }
@@ -104,6 +125,11 @@ class lockwriteListener implements ActionListener {
 		// lock the object in write mode
 
 		irc.sentence.lock_write();
+		irc.lock_read_button.setEnabled(false);
+		irc.lock_write_button.setEnabled(false);
+		irc.read_button.setEnabled(false);
+		irc.write_button.setEnabled(true);
+		irc.unlock_button.setEnabled(true);
 
 
 	}
@@ -122,6 +148,13 @@ class writeListenerl implements ActionListener {
 
 		((Sentence)(irc.sentence.getO())).write(Irc.myName+" wrote "+s);
 		irc.data.setText("");
+		
+
+		irc.lock_read_button.setEnabled(false);
+		irc.lock_write_button.setEnabled(false);
+		irc.read_button.setEnabled(false);
+		irc.write_button.setEnabled(true);
+		irc.unlock_button.setEnabled(true);
 
 
 	}
@@ -140,6 +173,11 @@ class unlockListener implements ActionListener {
 		// lock the object in write mode
 
 		irc.sentence.unlock();
+		irc.lock_read_button.setEnabled(true);
+		irc.lock_write_button.setEnabled(true);
+		irc.read_button.setEnabled(false);
+		irc.write_button.setEnabled(false);
+		irc.unlock_button.setEnabled(false);
 
 
 	}
@@ -157,6 +195,11 @@ class readListenerl implements ActionListener {
 		// lock the object in read mode
 		String s = ((Sentence)(irc.sentence.getO())).read();
 		irc.text.append(s+"\n");
+		irc.lock_read_button.setEnabled(false);
+		irc.lock_write_button.setEnabled(false);
+		irc.read_button.setEnabled(true);
+		irc.write_button.setEnabled(false);
+		irc.unlock_button.setEnabled(true);
 	}
 
 

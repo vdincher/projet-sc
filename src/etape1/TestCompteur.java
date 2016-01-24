@@ -38,15 +38,15 @@ public class TestCompteur  {
 		}	
 		Thread c1=new Processus(tableau);
 		Thread c2=new Processus(tableau);
-		Thread c3=new Processus(tableau);
-		Thread c4=new Processus(tableau);
+		//Thread c3=new Processus(tableau);
+		//Thread c4=new Processus(tableau);
 		
 		c1.start();
 		c2.start();
-		c3.start();
-		c4.start();
+		//c3.start();
+		//c4.start(); |c3.isAlive()||c4.isAlive()
 		
-while (c1.isAlive()||c2.isAlive()||c3.isAlive()||c4.isAlive()){
+while (c1.isAlive()||c2.isAlive()){
 
 }
 System.out.println("je suis un thread");

@@ -137,6 +137,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a reader invalidation request from the server
 	public synchronized void invalidate_reader(int id) throws java.rmi.RemoteException {
+
 		objets.get(id).invalidate_reader();
 	}
 
