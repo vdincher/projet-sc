@@ -68,17 +68,15 @@ public class Server extends UnicastRemoteObject implements Server_itf, Serializa
 	}
 
 	@Override
-	public Object lock_read(int id, Client_itf client) throws RemoteException {
-		this.objets.get(id).lock_read();
-		this.objets.get(id).getLecteurs().add(client);
+	public synchronized  Object lock_read(int id, Client_itf client) throws RemoteException {
+		this.objets.get(id).lock_read(client);
 		Object o = this.objets.get(id).getO();
 		return o;
 	}
 
 	@Override
-	public Object lock_write(int id, Client_itf client) throws RemoteException {
-		this.objets.get(id).lock_write();
-		this.objets.get(id).setRedacteur(client);
+	public synchronized  Object lock_write(int id, Client_itf client) throws RemoteException {
+		this.objets.get(id).lock_write(client);
 		Object o = this.objets.get(id).getO();
 		return o;
 	}

@@ -17,7 +17,6 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		super();
 	}
 
-	
 
 ///////////////////////////////////////////////////
 //         Interface to be used by applications
@@ -28,11 +27,9 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	}
 
 
-
 	public static void setObjets(HashMap<Integer, SharedObject> objets) {
 		Client.objets = objets;
 	}
-
 
 
 	// initialization of the client layer
@@ -150,15 +147,16 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a reader invalidation request from the server
 	public synchronized void invalidate_reader(int id) throws java.rmi.RemoteException {
+
 		objets.get(id).invalidate_reader();
 	}
 
 
 	// receive a writer invalidation request from the server
 	public synchronized Object invalidate_writer(int id) throws java.rmi.RemoteException {
-		System.out.println("i_r ient");
+
        objets.get(id).setO(objets.get(id).invalidate_writer());
-       System.out.println("après i_r ient");
+
 		return objets.get(id).getO();
 	}
 }

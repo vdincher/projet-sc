@@ -60,7 +60,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	// invoked by the user program on the client node
-	public  void lock_write() {
+	public void lock_write() {
 		if (statut!=Statut.wlc) {
 
 			this.setO(Client.lock_write(ID));
@@ -117,7 +117,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// callback invoked remotely by the server
 	public synchronized void invalidate_reader() {
-		while (this.statut==Statut.rlt) {
+		while (this.statut==Statut.rlt || this.statut==Statut.rlt_wlc) {
 			try {
 				wait();
 			} catch (InterruptedException e) {

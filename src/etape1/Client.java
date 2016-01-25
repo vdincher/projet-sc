@@ -22,6 +22,16 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 //         Interface to be used by applications
 ///////////////////////////////////////////////////
 
+	public static HashMap<Integer, SharedObject> getObjets() {
+		return objets;
+	}
+
+
+	public static void setObjets(HashMap<Integer, SharedObject> objets) {
+		Client.objets = objets;
+	}
+
+
 	// initialization of the client layer
 	public static void init() {
 		// Récupération d'un stub sur l'objet serveur.
