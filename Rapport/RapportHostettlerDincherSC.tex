@@ -56,7 +56,7 @@ Lorsqu'on lance cette méthode sur un $SharedObject$, cette méthode va se propa
 Le $ServerObject$ associé possède les informations actuelles de l'objet, c'est à dire, son éventuel rédacteur (Client) ou ses éventuels lecteurs. On observe alors 3 situations: 
 \begin{itemize}
 \item Le $ServerObject$ possède un rédacteur qui est en train d'écrire. Dans ce cas, on lance un $reduce\_lock$ sur celui-ci. Cette méthode attendra alors que le rédacteur ait fini d'écrire (méthode synchronisée contenant wait), et le fera passer en $rlc$ directement après, au lieu de passer en $wlc$. Ainsi, le lecteur pourra accéder à l'objet, puisque celui-ci ne sera plus occupé en écriture. L'ancien rédacteur a donc l'objet en cache pour l'écriture, puisque le nouveau lecteur n'y fera aucune modifications. \\
-Nous mettons également le $ServerObject$ concerné (on passe de $wl$ à $rl$, on ajoute le lecteur, ainsi que l'ancien rédacteur dans la collection de lecteurs (vide à ce moment là) et on met le rédacteur à {\bf null} et $red$ à \textbf{false}.
+Nous mettons également le $ServerObject$ concerné (on passe de $lw$ à $lr$, on ajoute le lecteur, ainsi que l'ancien rédacteur dans la collection de lecteurs (vide à ce moment là) et on met le rédacteur à {\bf null} et $red$ à \textbf{false}.
 \item La dernière personne à a voir accédé à l'objet est un rédacteur. Il a donc encore l'objet en cache, et il faut le prévenir que quelqu'un veut accéder à la lecture. On répète donc la même manipulation que précédemment, en appliquant un $reduce\_lock$ sur l'ancien rédacteur, et en faisant les mises à jour nécessaires. 
 \item Le $ServerObject$ est déjà occupé par d'autres personnes en lecture. Dans ce cas, il suffit de nous ajouter à la liste des lecteurs, et nous pouvons alors accéder à l'objet en lecture.\\\\
 \end{itemize}
@@ -83,7 +83,7 @@ Une fois l'objet bloqué en écriture, personne ne pourra plus y accéder, et le
 La méthode de déblocage est la même pour les lecteurs et les rédacteurs: 
 \begin{itemize}
 \item Si on est un lecteur, et qu'on a terminé de lire, on débloque notre $SharedObject$. Celui-ci va donc passer de $rlt$ à $rlc$, jusqu'à ce qu'un rédacteur ne le fasse passer à $nl$ (comme vu précédemment). Le lecteur n'est pas supprimé de la liste des lecteurs dans le $ServerObject$, puisqu'il possède toujours l'objet dans son cache, et est donc encore considéré comme un potentiel lecteur. On notifie également les personnes étant dans la file d'attente, afin qu'elles puissent accéder à la lecture ou à la lecture.
-\item Si on est en écriture, on passe en $wlc$, mais le $ServerObject$ concerné possède toujours un rédacteur, jusqu'à la prochaine demande. On notifie alors les autres personnes étant en attente. Si ces personnes sont des lecteurs, et qu'elles accèdent à l'objet, nous pouvons toujours lire, puisque nous sommes la dernière personne à avoir modifié l'objet (on passe ainsi en $rlt_wlc$ si on fait un $lock\_read$).
+\item Si on est en écriture, on passe en $wlc$, mais le $ServerObject$ concerné possède toujours un rédacteur, jusqu'à la prochaine demande. On notifie alors les autres personnes étant en attente. Si ces personnes sont des lecteurs, et qu'elles accèdent à l'objet, nous pouvons toujours lire, puisque nous sommes la dernière personne à avoir modifié l'objet (on passe ainsi en $rlt\_wlc$ si on fait un $lock\_read$).
 \end{itemize}
 
 \textbf{Remarques:}
@@ -101,5 +101,37 @@ Nous avons également créé un IRCtest, qui permet ainsi de bloquer et débloqu
 \includegraphics[scale=0.5]{IRCtes.png}
 \end{center}
 \end{figure}
+
+
+\section{Implémentation des transaction}
+
+
+L'étape 1 consistait en l’ajout d’une classe \textbf{Transaction}  permettant à l’application utilisateur (ici IRC) d’utiliser des transactions lors de ses appels en lecture/écriture, afin de se protéger d’une éventuelle coupure de courant ou autre erreur de la sorte.\\
+En effet, lors d’un problème machine, sans transaction, la gestion de la concurrence des accès est perturbée, alors que la méthode abort() de la classe Transaction permet d’éviter tout problème en annulant les modifications faites par l’utilisateur et en libérant ensuite les verrous sur les objets concernés.\\\\
+
+La classe Transaction dispose des méthodes suivantes :
+\begin{itemize}
+\item start() qui permet de définir une transaction comme la transaction courante (La classe Transaction dispose d’un attribut static \texttt{transationCourante}  qui gère cela).
+\item commit() qui permet de valider les modifications de l’utilisateur (appel de $unlock()$ sur les $SharedObjects$) et de « fermer » la transaction (remettre l’attribut \texttt{transactionCourante} à null).
+\item $abort()$ qui permet d’invalider les modifications de l’utilisateur et de « fermer » la transaction.
+\item $getCurrentTransaction()$ qui retourne la transaction courante.\\\\
+\end{itemize}
+
+
+Il a également été nécessaire de modifier la classe $SharedObject$ pour que les méthodes $lock\_read()$ et $lock\_write()$ sauvegarde l’état de l’objet dans la transaction.\\ Et, évidemment, il a fallu changer la classe \texttt{Irc}  pour utiliser les transactions. Nous avons d’ailleurs choisi de laisser la possibilité à l’utilisateur de se servir ou non des transactions.
+
+
+\section{Implémentation du générateur de Stubs}
+
+L'étape 3 avait pour but de rendre l’utilisation des \textbf{SharedObjects}  plus discrète. En effet, avec l’utilisation de stub, l’utilisateur n’a plus à savoir se servir d’un   \textbf{SharedObject}.\\
+Tout d’abord, nous avons dû crée un générateur de stub, qui, à partir d’une interface, pouvait créer une classe stub associée.
+Ensuite, il a fallu modifier la classe \textbf{Client} afin qu’il ne crée non plus des $SharedObjects$ quelconques, mais des stub.\\ Il faut pour cela récupérer le nom de la classe stub puis récupérer son constructeur afin de créer une nouvelle instance de stub.\\
+ Dans le cas du lookup du client, il faut pouvoir accéder à un objet afin de trouver le nom de la classe stub, c’est pourquoi nous avons rajouté une méthode $getObjectFromName()$ dans la classe \textbf{Server}. Cette méthode, comme son nom l’indique, retourne un objet contenu dans un \textbf{ServerObject}  possédant le nom donné en paramètre.
+ 
+ \section*{Conclusion}
+ 
+ Pour conclure, ce projet nous a permis d'illustrer le concept de la concurrence dans le domaine concret de l'objet partagé. Nous avons pu ainsi mêler les domaines de l'intergiciel (avec l'utilisation de serveurs RMI) et le système concurrents (avec les méthodes synchronisées). 
+ 
+Le partage d'objets pourrait être plus permissif dans le cadre d'une application plus puissante, afin que tous les lecteurs et rédacteurs puissent y accéder en même temps (comme par exemple dans les document de google partagés sur le drive, où les modifications sont réalisées en direct pour chaque personne).   
 
 \end{document}
